@@ -25,11 +25,20 @@ pub struct Snapshot {
 }
 
 fn number(v: &Value) -> f64 {
-    v.as_str().and_then(|s| s.parse().ok()).or_else(|| v.as_f64()).unwrap_or(0.0)
+    v.as_str()
+        .and_then(|s| s.parse().ok())
+        .or_else(|| v.as_f64())
+        .unwrap_or(0.0)
 }
 
 async fn fetch_candles(client: &reqwest::Client) -> Result<Vec<Candle>> {
-    let rows: Vec<Vec<Value>> = client.get(REST_URL).send().await?.error_for_status()?.json().await?;
+    let rows: Vec<Vec<Value>> = client
+        .get(REST_URL)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
     Ok(rows
         .into_iter()
         .filter(|r| r.len() >= 5)
@@ -56,7 +65,13 @@ fn apply_trade(candles: &mut Vec<Candle>, price: f64, timestamp: i64) {
             return;
         }
     }
-    candles.push(Candle { open_time: bucket, open: price, high: price, low: price, close: price });
+    candles.push(Candle {
+        open_time: bucket,
+        open: price,
+        high: price,
+        low: price,
+        close: price,
+    });
     if candles.len() > 3 {
         candles.drain(0..candles.len() - 3);
     }
@@ -132,7 +147,13 @@ mod tests {
 
     #[test]
     fn trade_updates_current_hour() {
-        let mut candles = vec![Candle { open_time: 0, open: 100.0, high: 100.0, low: 100.0, close: 100.0 }];
+        let mut candles = vec![Candle {
+            open_time: 0,
+            open: 100.0,
+            high: 100.0,
+            low: 100.0,
+            close: 100.0,
+        }];
         apply_trade(&mut candles, 105.0, 1_800_000);
         assert_eq!(candles.len(), 1);
         assert_eq!(candles[0].close, 105.0);
@@ -141,7 +162,13 @@ mod tests {
 
     #[test]
     fn trade_creates_new_hour() {
-        let mut candles = vec![Candle { open_time: 0, open: 100.0, high: 100.0, low: 100.0, close: 100.0 }];
+        let mut candles = vec![Candle {
+            open_time: 0,
+            open: 100.0,
+            high: 100.0,
+            low: 100.0,
+            close: 100.0,
+        }];
         apply_trade(&mut candles, 110.0, 3_600_000);
         assert_eq!(candles.len(), 2);
         assert_eq!(candles[1].open, 110.0);
