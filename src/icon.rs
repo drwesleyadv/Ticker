@@ -8,7 +8,7 @@ pub fn render(candles: &[Candle]) -> String {
     let visible = candles.iter().rev().take(3).collect::<Vec<_>>();
     let mut ordered = visible.into_iter().rev().collect::<Vec<_>>();
     if ordered.is_empty() {
-        return r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="8" y="8" width="48" height="48" rx="14" fill="#69707D"/></svg>"#.to_string();
+        return r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="8" y="8" width="48" height="48" rx="14" fill="#69707D"/></svg>"##.to_string();
     }
 
     let low = ordered.iter().map(|c| c.low).fold(f64::INFINITY, f64::min);
@@ -26,7 +26,7 @@ pub fn render(candles: &[Candle]) -> String {
         let bottom = y(candle.open.min(candle.close));
         let body_height = (bottom - top).max(5.0);
         body.push_str(&format!(
-            r#"<line x1="{x:.1}" y1="{high_y:.1}" x2="{x:.1}" y2="{low_y:.1}" stroke="{color}" stroke-width="3" stroke-linecap="round"/><rect x="{left:.1}" y="{top:.1}" width="{width:.1}" height="{body_height:.1}" rx="3" fill="{color}"/>"#,
+            r##"<line x1="{x:.1}" y1="{high_y:.1}" x2="{x:.1}" y2="{low_y:.1}" stroke="{color}" stroke-width="3" stroke-linecap="round"/><rect x="{left:.1}" y="{top:.1}" width="{width:.1}" height="{body_height:.1}" rx="3" fill="{color}"/>"##,
             x = x,
             high_y = y(candle.high),
             low_y = y(candle.low),
