@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Solana Ticker
+Comment=Live SOL/USDT price and three one-hour candles in the COSMIC panel
+Type=Application
+Icon=com.github.drwesleyadv.Ticker
+Exec=ticker
+Terminal=false
+StartupNotify=false
+Categories=COSMIC;
+Keywords=Solana;SOL;crypto;cryptocurrency;COSMIC;
+NoDisplay=true
+X-CosmicApplet=true
+X-CosmicHoverPopup=Auto
