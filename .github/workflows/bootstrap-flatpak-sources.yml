@@ -1,0 +1,36 @@
+name: Bootstrap Flatpak sources
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.1
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config libssl-dev libxkbcommon-dev python3-aiohttp python3-tomlkit
+      - name: Generate locked dependency graph
+        run: cargo update -p cosmic-text --precise a07a6190548c8e40a55f6b7761387047ff1bf6ff
+      - name: Generate Flatpak Cargo sources
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/cargo/flatpak-cargo-generator.py -o /tmp/flatpak-cargo-generator.py
+          python3 /tmp/flatpak-cargo-generator.py Cargo.lock -o packaging/flatpak/cargo-sources.json
+      - name: Commit generated files
+        run: |
+          if git diff --quiet -- Cargo.lock packaging/flatpak/cargo-sources.json; then
+            echo "Generated files are already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Cargo.lock packaging/flatpak/cargo-sources.json
+          git commit -m "build: generate locked Flatpak sources"
+          git push
