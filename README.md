@@ -1,10 +1,12 @@
 # Solana Ticker for COSMIC
 
-A small native COSMIC panel applet that displays the live SOL/USDT price and the latest three one-hour candles.
+A small native COSMIC panel applet that displays the live SOL/USDT price, the latest three one-hour candles, and Binance's rolling 24-hour percentage change.
 
 ## Features
 
 - real-time SOL/USDT trades from Binance;
+- Binance rolling 24h price-change percentage;
+- green up arrow for positive/zero change and red down arrow for negative change;
 - local reconstruction of the current one-hour OHLC candle;
 - three-candle dynamic vector icon;
 - UI refresh capped at 10 Hz;
@@ -14,6 +16,8 @@ A small native COSMIC panel applet that displays the live SOL/USDT price and the
 - designed to run as a COSMIC Panel applet, not as a standalone window.
 
 The displayed market is **SOL/USDT**. USDT is used as the dollar proxy; it is not a direct fiat USD feed.
+
+The percentage is Binance's **rolling 24-hour change**, not the change since 00:00 UTC or local midnight.
 
 ## Distribution
 
