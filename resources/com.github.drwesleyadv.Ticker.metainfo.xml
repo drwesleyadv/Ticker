@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.github.drwesleyadv.Ticker</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Solana Ticker</name>
+  <summary>Live SOL/USDT price and three one-hour candles in the COSMIC panel</summary>
+  <description>
+    <p>A lightweight COSMIC panel applet that displays the live SOL/USDT price from Binance and renders the latest three one-hour candles as a dynamic icon.</p>
+    <p>The applet uses Binance's public market-data endpoints and does not require an API key, account, or local configuration.</p>
+  </description>
+  <icon type="remote" width="64" height="64" scale="1">
+    https://raw.githubusercontent.com/drwesleyadv/Ticker/main/resources/com.github.drwesleyadv.Ticker.svg
+  </icon>
+  <url type="homepage">https://github.com/drwesleyadv/Ticker</url>
+  <url type="vcs-browser">https://github.com/drwesleyadv/Ticker</url>
+  <launchable type="desktop-id">com.github.drwesleyadv.Ticker.desktop</launchable>
+  <provides>
+    <id>com.github.drwesleyadv.Ticker</id>
+    <binaries>
+      <binary>ticker</binary>
+    </binaries>
+  </provides>
+  <categories>
+    <category>COSMIC</category>
+  </categories>
+  <keywords>
+    <keyword>COSMIC</keyword>
+    <keyword>Solana</keyword>
+    <keyword>SOL</keyword>
+    <keyword>cryptocurrency</keyword>
+  </keywords>
+  <content_rating type="oars-1.1" />
+</component>
