@@ -5,7 +5,8 @@ use std::time::{Duration, Instant};
 use tokio_tungstenite::{connect_async, tungstenite::Message as WsMessage};
 
 pub const UI_PERIOD: Duration = Duration::from_millis(100);
-const REST_URL: &str = "https://data-api.binance.vision/api/v3/klines?symbol=SOLUSDT&interval=1h&limit=3";
+const KLINES_URL: &str = "https://data-api.binance.vision/api/v3/klines?symbol=SOLUSDT&interval=1h&limit=3";
+const TICKER_24H_URL: &str = "https://data-api.binance.vision/api/v3/ticker/24hr?symbol=SOLUSDT";
 const WS_URL: &str = "wss://data-stream.binance.vision:443/ws/solusdt@trade";
 
 #[derive(Clone, Debug, Default)]
@@ -20,6 +21,7 @@ pub struct Candle {
 #[derive(Clone, Debug, Default)]
 pub struct Snapshot {
     pub price: f64,
+    pub change_24h: f64,
     pub candles: Vec<Candle>,
     pub connected: bool,
 }
@@ -33,7 +35,7 @@ fn number(v: &Value) -> f64 {
 
 async fn fetch_candles(client: &reqwest::Client) -> Result<Vec<Candle>> {
     let rows: Vec<Vec<Value>> = client
-        .get(REST_URL)
+        .get(KLINES_URL)
         .send()
         .await?
         .error_for_status()?
@@ -50,6 +52,17 @@ async fn fetch_candles(client: &reqwest::Client) -> Result<Vec<Candle>> {
             close: number(&r[4]),
         })
         .collect())
+}
+
+async fn fetch_change_24h(client: &reqwest::Client) -> Result<f64> {
+    let payload: Value = client
+        .get(TICKER_24H_URL)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+    Ok(number(payload.get("priceChangePercent").unwrap_or(&Value::Null)))
 }
 
 fn apply_trade(candles: &mut Vec<Candle>, price: f64, timestamp: i64) {
@@ -80,7 +93,7 @@ fn apply_trade(candles: &mut Vec<Candle>, price: f64, timestamp: i64) {
 fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
     async_stream::stream! {
         let client = reqwest::Client::builder()
-            .user_agent("Ticker/0.1")
+            .user_agent("Ticker/1.1")
             .build()
             .expect("valid reqwest client");
         let mut backoff = Duration::from_secs(1);
@@ -88,17 +101,18 @@ fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
         loop {
             let mut candles = fetch_candles(&client).await.unwrap_or_default();
             let mut price = candles.last().map(|c| c.close).unwrap_or_default();
+            let mut change_24h = fetch_change_24h(&client).await.unwrap_or_default();
             let mut last_emit = Instant::now() - UI_PERIOD;
 
             if price > 0.0 {
-                yield Snapshot { price, candles: candles.clone(), connected: false };
+                yield Snapshot { price, change_24h, candles: candles.clone(), connected: false };
                 last_emit = Instant::now();
             }
 
             match connect_async(WS_URL).await {
                 Ok((mut socket, _)) => {
                     backoff = Duration::from_secs(1);
-                    yield Snapshot { price, candles: candles.clone(), connected: true };
+                    yield Snapshot { price, change_24h, candles: candles.clone(), connected: true };
                     last_emit = Instant::now();
 
                     while let Some(item) = socket.next().await {
@@ -112,7 +126,9 @@ fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
                                             price = next_price;
                                             apply_trade(&mut candles, price, timestamp);
                                             if last_emit.elapsed() >= UI_PERIOD {
-                                                yield Snapshot { price, candles: candles.clone(), connected: true };
+                                                // Binance's 24h change is a rolling market statistic.
+                                                change_24h = fetch_change_24h(&client).await.unwrap_or(change_24h);
+                                                yield Snapshot { price, change_24h, candles: candles.clone(), connected: true };
                                                 last_emit = Instant::now();
                                             }
                                         }
@@ -130,7 +146,7 @@ fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
                 Err(_) => {}
             }
 
-            yield Snapshot { price, candles: candles.clone(), connected: false };
+            yield Snapshot { price, change_24h, candles: candles.clone(), connected: false };
             tokio::time::sleep(backoff).await;
             backoff = (backoff * 2).min(Duration::from_secs(30));
         }
