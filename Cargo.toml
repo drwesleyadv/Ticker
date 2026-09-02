@@ -1,0 +1,29 @@
+[package]
+name = "ticker"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+description = "A COSMIC panel applet for the live SOL/USDT price and three one-hour candles."
+repository = "https://github.com/drwesleyadv/Ticker"
+
+[dependencies]
+anyhow = "1"
+async-stream = "0.3"
+futures-util = "0.3"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["time"] }
+tokio-tungstenite = { version = "0.27", features = ["rustls-tls-webpki-roots"] }
+
+[dependencies.libcosmic]
+git = "https://github.com/pop-os/libcosmic"
+rev = "a9f64c33ce9159485be5dad1ce07ccf7c12399d5"
+default-features = false
+features = ["applet", "applet-token", "dbus-config", "multi-window", "tokio", "wayland", "winit"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
