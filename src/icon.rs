@@ -50,3 +50,14 @@ pub fn render(candles: &[Candle]) -> String {
 
     format!(r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">{body}</svg>"#)
 }
+
+pub fn direction(change_percent: f64) -> String {
+    let (color, points) = if change_percent >= 0.0 {
+        ("#10B981", "32,7 52,31 40,31 40,57 24,57 24,31 12,31")
+    } else {
+        ("#F05252", "24,7 40,7 40,33 52,33 32,57 12,33 24,33")
+    };
+    format!(
+        r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><polygon points="{points}" fill="{color}"/></svg>"#
+    )
+}
