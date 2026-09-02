@@ -64,9 +64,14 @@ impl cosmic::Application for AppModel {
     fn view(&self) -> Element<Message> {
         let panel_height = self.core.applet.suggested_size(true).1 as f32;
         let svg_data = icon::render(&self.snapshot.candles);
-        let icon = widget::svg(svg::Handle::from_memory(svg_data.into_bytes()))
+        let candle_icon = widget::svg(svg::Handle::from_memory(svg_data.into_bytes()))
             .width(Length::Fixed(panel_height))
             .height(Length::Fixed(panel_height));
+
+        let arrow_data = icon::direction(self.snapshot.change_percent);
+        let arrow = widget::svg(svg::Handle::from_memory(arrow_data.into_bytes()))
+            .width(Length::Fixed(panel_height * 0.58))
+            .height(Length::Fixed(panel_height * 0.58));
 
         let price = if self.snapshot.price > 0.0 {
             format!("${:.2}", self.snapshot.price)
@@ -74,9 +79,17 @@ impl cosmic::Application for AppModel {
             "$--".to_string()
         };
 
+        let change = if self.snapshot.price > 0.0 {
+            format!("{:+.2}%", self.snapshot.change_percent)
+        } else {
+            "--%".to_string()
+        };
+
         let row = widget::row()
-            .push(icon)
+            .push(candle_icon)
             .push(widget::text(price).size(14))
+            .push(arrow)
+            .push(widget::text(change).size(14))
             .spacing(4)
             .align_y(Alignment::Center);
 
