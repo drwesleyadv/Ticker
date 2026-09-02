@@ -1,0 +1,43 @@
+{
+  "id": "com.github.drwesleyadv.Ticker",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "25.08",
+  "sdk": "org.freedesktop.Sdk",
+  "sdk-extensions": ["org.freedesktop.Sdk.Extension.rust-stable"],
+  "base": "com.system76.Cosmic.BaseApp",
+  "base-version": "stable",
+  "command": "ticker",
+  "finish-args": [
+    "--socket=wayland",
+    "--share=ipc",
+    "--share=network"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin",
+    "env": {
+      "CARGO_HOME": "/run/build/ticker/cargo"
+    }
+  },
+  "modules": [
+    {
+      "name": "ticker",
+      "buildsystem": "simple",
+      "build-commands": [
+        "cargo fetch --locked --offline --manifest-path Cargo.toml --verbose",
+        "cargo build --locked --offline --release --verbose",
+        "install -Dm0755 target/release/ticker /app/bin/ticker",
+        "install -Dm0644 resources/com.github.drwesleyadv.Ticker.desktop /app/share/applications/com.github.drwesleyadv.Ticker.desktop",
+        "install -Dm0644 resources/com.github.drwesleyadv.Ticker.metainfo.xml /app/share/metainfo/com.github.drwesleyadv.Ticker.metainfo.xml",
+        "install -Dm0644 resources/com.github.drwesleyadv.Ticker.svg /app/share/icons/hicolor/scalable/apps/com.github.drwesleyadv.Ticker.svg"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/drwesleyadv/Ticker.git",
+          "commit": "2f9c48cb759703f27bce4ac7cedf103318371e51"
+        },
+        "cargo-sources.json"
+      ]
+    }
+  ]
+}
