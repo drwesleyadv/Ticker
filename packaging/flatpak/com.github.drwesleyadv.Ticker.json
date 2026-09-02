@@ -34,7 +34,7 @@
         {
           "type": "git",
           "url": "https://github.com/drwesleyadv/Ticker.git",
-          "commit": "27c6c77e115be8b8d0b3f7c41db0488f9c90b4ba"
+          "commit": "fae780ea7144245e5fc5b61b257552492e6cecef"
         },
         "cargo-sources.json"
       ]
