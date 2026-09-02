@@ -14,9 +14,9 @@
   </icon>
   <url type="homepage">https://github.com/drwesleyadv/Ticker</url>
   <url type="vcs-browser">https://github.com/drwesleyadv/Ticker</url>
-  <launchable type="desktop-id">com.github.drwesleyadv.Ticker.desktop</launchable>
   <provides>
     <id>com.github.drwesleyadv.Ticker</id>
+    <id>com.system76.CosmicApplet</id>
     <binaries>
       <binary>ticker</binary>
     </binaries>
