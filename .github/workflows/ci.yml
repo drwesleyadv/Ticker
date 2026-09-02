@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.1
+          components: rustfmt, clippy
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config libssl-dev libxkbcommon-dev
+      - name: Stabilize cosmic-text revision
+        run: cargo update -p cosmic-text --precise a07a6190548c8e40a55f6b7761387047ff1bf6ff
+      - name: Format
+        run: cargo fmt --check
+      - name: Test
+        run: cargo test --locked
+      - name: Build
+        run: cargo build --release --locked
