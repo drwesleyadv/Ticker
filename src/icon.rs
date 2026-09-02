@@ -1,7 +1,11 @@
 use crate::market::Candle;
 
 fn candle_color(candle: &Candle) -> &'static str {
-    if candle.close >= candle.open { "#10B981" } else { "#F05252" }
+    if candle.close >= candle.open {
+        "#10B981"
+    } else {
+        "#F05252"
+    }
 }
 
 pub fn render(candles: &[Candle]) -> String {
@@ -11,8 +15,14 @@ pub fn render(candles: &[Candle]) -> String {
         return r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="8" y="8" width="48" height="48" rx="14" fill="#69707D"/></svg>"##.to_string();
     }
 
-    let low = ordered.iter().map(|c| c.low).fold(f64::INFINITY, f64::min);
-    let high = ordered.iter().map(|c| c.high).fold(f64::NEG_INFINITY, f64::max);
+    let low = ordered
+        .iter()
+        .map(|c| c.low)
+        .fold(f64::INFINITY, f64::min);
+    let high = ordered
+        .iter()
+        .map(|c| c.high)
+        .fold(f64::NEG_INFINITY, f64::max);
     let range = (high - low).max(1e-9);
     let y = |price: f64| 8.0 + (high - price) / range * 48.0;
     let xs = [12.0, 32.0, 52.0];
