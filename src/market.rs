@@ -1,7 +1,7 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use futures_util::{SinkExt, StreamExt};
 use serde_json::Value;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tokio_tungstenite::{connect_async, tungstenite::Message as WsMessage};
 
 pub const UI_PERIOD: Duration = Duration::from_millis(100);
@@ -30,7 +30,7 @@ fn number(v: &Value) -> f64 {
 
 async fn fetch_candles(client: &reqwest::Client) -> Result<Vec<Candle>> {
     let rows: Vec<Vec<Value>> = client.get(REST_URL).send().await?.error_for_status()?.json().await?;
-    let candles = rows
+    Ok(rows
         .into_iter()
         .filter(|r| r.len() >= 5)
         .map(|r| Candle {
@@ -40,8 +40,7 @@ async fn fetch_candles(client: &reqwest::Client) -> Result<Vec<Candle>> {
             low: number(&r[3]),
             close: number(&r[4]),
         })
-        .collect();
-    Ok(candles)
+        .collect())
 }
 
 fn apply_trade(candles: &mut Vec<Candle>, price: f64, timestamp: i64) {
@@ -57,16 +56,9 @@ fn apply_trade(candles: &mut Vec<Candle>, price: f64, timestamp: i64) {
             return;
         }
     }
-    candles.push(Candle {
-        open_time: bucket,
-        open: price,
-        high: price,
-        low: price,
-        close: price,
-    });
+    candles.push(Candle { open_time: bucket, open: price, high: price, low: price, close: price });
     if candles.len() > 3 {
-        let excess = candles.len() - 3;
-        candles.drain(0..excess);
+        candles.drain(0..candles.len() - 3);
     }
 }
 
@@ -79,19 +71,20 @@ async fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
         let mut backoff = Duration::from_secs(1);
 
         loop {
-            let mut candles = match fetch_candles(&client).await {
-                Ok(c) => c,
-                Err(_) => Vec::new(),
-            };
+            let mut candles = fetch_candles(&client).await.unwrap_or_default();
             let mut price = candles.last().map(|c| c.close).unwrap_or_default();
+            let mut last_emit = Instant::now() - UI_PERIOD;
+
             if price > 0.0 {
                 yield Snapshot { price, candles: candles.clone(), connected: false };
+                last_emit = Instant::now();
             }
 
             match connect_async(WS_URL).await {
                 Ok((mut socket, _)) => {
                     backoff = Duration::from_secs(1);
                     yield Snapshot { price, candles: candles.clone(), connected: true };
+                    last_emit = Instant::now();
 
                     while let Some(item) = socket.next().await {
                         match item {
@@ -103,7 +96,10 @@ async fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
                                         if next_price > 0.0 {
                                             price = next_price;
                                             apply_trade(&mut candles, price, timestamp);
-                                            yield Snapshot { price, candles: candles.clone(), connected: true };
+                                            if last_emit.elapsed() >= UI_PERIOD {
+                                                yield Snapshot { price, candles: candles.clone(), connected: true };
+                                                last_emit = Instant::now();
+                                            }
                                         }
                                     }
                                 }
