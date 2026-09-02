@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Solana Ticker
-Comment=Live SOL/USDT price and three one-hour candles in the COSMIC panel
+Comment=Live SOL/USDT price, three one-hour candles and 24h change in the COSMIC panel
 Type=Application
 Icon=com.github.drwesleyadv.Ticker
 Exec=ticker
