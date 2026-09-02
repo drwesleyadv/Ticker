@@ -25,7 +25,7 @@ jobs:
           python3 /tmp/flatpak-cargo-generator.py Cargo.lock -o packaging/flatpak/cargo-sources.json
       - name: Commit generated files
         run: |
-          if git diff --quiet -- Cargo.lock packaging/flatpak/cargo-sources.json; then
+          if [ -z "$(git status --porcelain -- Cargo.lock packaging/flatpak/cargo-sources.json)" ]; then
             echo "Generated files are already current."
             exit 0
           fi
