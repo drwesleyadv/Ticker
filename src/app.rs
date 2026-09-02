@@ -13,7 +13,10 @@ pub struct AppModel {
 
 impl Default for AppModel {
     fn default() -> Self {
-        Self { core: Core::default(), snapshot: Snapshot::default() }
+        Self {
+            core: Core::default(),
+            snapshot: Snapshot::default(),
+        }
     }
 }
 
@@ -29,11 +32,22 @@ impl cosmic::Application for AppModel {
     type Message = Message;
     const APP_ID: &'static str = APP_ID;
 
-    fn core(&self) -> &Core { &self.core }
-    fn core_mut(&mut self) -> &mut Core { &mut self.core }
+    fn core(&self) -> &Core {
+        &self.core
+    }
+
+    fn core_mut(&mut self) -> &mut Core {
+        &mut self.core
+    }
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Message>) {
-        (Self { core, ..Default::default() }, Task::none())
+        (
+            Self {
+                core,
+                ..Default::default()
+            },
+            Task::none(),
+        )
     }
 
     fn update(&mut self, message: Message) -> Task<Message> {
