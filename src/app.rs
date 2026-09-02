@@ -64,7 +64,7 @@ impl cosmic::Application for AppModel {
     fn view(&self) -> Element<Message> {
         let panel_height = self.core.applet.suggested_size(true).1 as f32;
         let svg_data = icon::render(&self.snapshot.candles);
-        let icon = widget::svg(svg::Handle::from_memory(svg_data.into_bytes()))
+        let candle_icon = widget::svg(svg::Handle::from_memory(svg_data.into_bytes()))
             .width(Length::Fixed(panel_height))
             .height(Length::Fixed(panel_height));
 
@@ -74,9 +74,28 @@ impl cosmic::Application for AppModel {
             "$--".to_string()
         };
 
+        let change = self.snapshot.change_24h;
+        let arrow_up = change >= 0.0;
+        let arrow = if arrow_up { "▲" } else { "▼" };
+        let arrow_color = if arrow_up { "#22c55e" } else { "#ef4444" };
+        let arrow_svg = format!(
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\"><text x=\"8\" y=\"13\" text-anchor=\"middle\" font-size=\"14\" fill=\"{arrow_color}\">{arrow}</text></svg>"
+        );
+        let direction_icon = widget::svg(svg::Handle::from_memory(arrow_svg.into_bytes()))
+            .width(Length::Fixed(14.0))
+            .height(Length::Fixed(14.0));
+
+        let change_text = if change == 0.0 {
+            "0.00%".to_string()
+        } else {
+            format!("{:+.2}%", change)
+        };
+
         let row = widget::row()
-            .push(icon)
+            .push(candle_icon)
             .push(widget::text(price).size(14))
+            .push(direction_icon)
+            .push(widget::text(change_text).size(14))
             .spacing(4)
             .align_y(Alignment::Center);
 
