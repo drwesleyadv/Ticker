@@ -6,8 +6,7 @@ use tokio_tungstenite::{connect_async, tungstenite::Message as WsMessage};
 
 pub const UI_PERIOD: Duration = Duration::from_millis(100);
 const KLINES_URL: &str = "https://data-api.binance.vision/api/v3/klines?symbol=SOLUSDT&interval=1h&limit=3";
-const TICKER_24H_URL: &str = "https://data-api.binance.vision/api/v3/ticker/24hr?symbol=SOLUSDT";
-const WS_URL: &str = "wss://data-stream.binance.vision:443/ws/solusdt@trade";
+const WS_URL: &str = "wss://data-stream.binance.vision:443/stream?streams=solusdt@trade/solusdt@ticker";
 
 #[derive(Clone, Debug, Default)]
 pub struct Candle {
@@ -54,17 +53,6 @@ async fn fetch_candles(client: &reqwest::Client) -> Result<Vec<Candle>> {
         .collect())
 }
 
-async fn fetch_change_24h(client: &reqwest::Client) -> Result<f64> {
-    let payload: Value = client
-        .get(TICKER_24H_URL)
-        .send()
-        .await?
-        .error_for_status()?
-        .json()
-        .await?;
-    Ok(number(payload.get("priceChangePercent").unwrap_or(&Value::Null)))
-}
-
 fn apply_trade(candles: &mut Vec<Candle>, price: f64, timestamp: i64) {
     if price <= 0.0 {
         return;
@@ -93,7 +81,7 @@ fn apply_trade(candles: &mut Vec<Candle>, price: f64, timestamp: i64) {
 fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
     async_stream::stream! {
         let client = reqwest::Client::builder()
-            .user_agent("Ticker/1.1")
+            .user_agent("Ticker/1.2")
             .build()
             .expect("valid reqwest client");
         let mut backoff = Duration::from_secs(1);
@@ -101,7 +89,7 @@ fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
         loop {
             let mut candles = fetch_candles(&client).await.unwrap_or_default();
             let mut price = candles.last().map(|c| c.close).unwrap_or_default();
-            let mut change_24h = fetch_change_24h(&client).await.unwrap_or_default();
+            let mut change_24h = 0.0;
             let mut last_emit = Instant::now() - UI_PERIOD;
 
             if price > 0.0 {
@@ -118,20 +106,29 @@ fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
                     while let Some(item) = socket.next().await {
                         match item {
                             Ok(WsMessage::Text(text)) => {
-                                if let Ok(payload) = serde_json::from_str::<Value>(&text) {
-                                    if payload.get("e").and_then(Value::as_str) == Some("trade") {
+                                if let Ok(envelope) = serde_json::from_str::<Value>(&text) {
+                                    let stream = envelope.get("stream").and_then(Value::as_str).unwrap_or("");
+                                    let payload = envelope.get("data").unwrap_or(&envelope);
+
+                                    if stream.ends_with("@trade") {
                                         let next_price = number(payload.get("p").unwrap_or(&Value::Null));
                                         let timestamp = payload.get("T").and_then(Value::as_i64).unwrap_or(0);
                                         if next_price > 0.0 {
                                             price = next_price;
                                             apply_trade(&mut candles, price, timestamp);
-                                            if last_emit.elapsed() >= UI_PERIOD {
-                                                // Binance's 24h change is a rolling market statistic.
-                                                change_24h = fetch_change_24h(&client).await.unwrap_or(change_24h);
-                                                yield Snapshot { price, change_24h, candles: candles.clone(), connected: true };
-                                                last_emit = Instant::now();
-                                            }
                                         }
+                                    } else if stream.ends_with("@ticker") {
+                                        let next_price = number(payload.get("c").unwrap_or(&Value::Null));
+                                        let next_change = number(payload.get("P").unwrap_or(&Value::Null));
+                                        if next_price > 0.0 {
+                                            price = next_price;
+                                        }
+                                        change_24h = next_change;
+                                    }
+
+                                    if last_emit.elapsed() >= UI_PERIOD {
+                                        yield Snapshot { price, change_24h, candles: candles.clone(), connected: true };
+                                        last_emit = Instant::now();
                                     }
                                 }
                             }
