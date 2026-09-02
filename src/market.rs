@@ -62,7 +62,7 @@ fn apply_trade(candles: &mut Vec<Candle>, price: f64, timestamp: i64) {
     }
 }
 
-async fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
+fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
     async_stream::stream! {
         let client = reqwest::Client::builder()
             .user_agent("Ticker/0.1")
@@ -123,7 +123,7 @@ async fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
 }
 
 pub fn subscription() -> cosmic::iced::Subscription<Snapshot> {
-    cosmic::iced::Subscription::run(|| run_stream())
+    cosmic::iced::Subscription::run(run_stream)
 }
 
 #[cfg(test)]
