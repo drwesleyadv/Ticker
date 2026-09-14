@@ -1,6 +1,6 @@
 use crate::{
     icon,
-    market_v2::{self, Snapshot},
+    market::{self, Snapshot},
     settings::{DraftSettings, Settings, TIMEFRAME_LABELS},
 };
 use cosmic::app::{Core, Task};
@@ -179,7 +179,7 @@ impl cosmic::Application for AppModel {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        market_v2::subscription(self.settings).map(Message::Market)
+        market::subscription(self.settings).map(Message::Market)
     }
 
     fn view(&self) -> Element<'_, Message> {
