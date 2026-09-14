@@ -1,10 +1,17 @@
-use crate::{icon, market::{self, Snapshot}};
+use crate::{
+    icon,
+    market::{self, Snapshot},
+};
 use cosmic::app::{Core, Task};
 use cosmic::iced::{Alignment, Length, Subscription, widget::svg};
 use cosmic::prelude::*;
 use cosmic::widget;
 
 const APP_ID: &str = "com.github.drwesleyadv.Ticker";
+const TEXT_SIZE: u16 = 14;
+const CONTENT_PADDING: [u16; 2] = [0, 6];
+const CONTENT_SPACING: u16 = 4;
+const DIRECTION_ICON_SCALE: f32 = 0.58;
 
 pub struct AppModel {
     core: Core,
@@ -62,40 +69,30 @@ impl cosmic::Application for AppModel {
     }
 
     fn view(&self) -> Element<Message> {
-        let panel_height = self.core.applet.suggested_size(true).1 as f32;
-        let svg_data = icon::render(&self.snapshot.candles);
-        let candle_icon = widget::svg(svg::Handle::from_memory(svg_data.into_bytes()))
-            .width(Length::Fixed(panel_height))
-            .height(Length::Fixed(panel_height));
-
-        let arrow_data = icon::direction(self.snapshot.change_percent);
-        let arrow = widget::svg(svg::Handle::from_memory(arrow_data.into_bytes()))
-            .width(Length::Fixed(panel_height * 0.58))
-            .height(Length::Fixed(panel_height * 0.58));
-
-        let price = if self.snapshot.price > 0.0 {
-            format!("${:.2}", self.snapshot.price)
-        } else {
-            "$--".to_string()
-        };
-
-        let change = if self.snapshot.price > 0.0 {
-            format!("{:+.2}%", self.snapshot.change_percent)
-        } else {
-            "--%".to_string()
-        };
+        let panel_height = self.core.applet.suggested_size(true).1.max(1) as f32;
+        let candle_icon = svg_widget(icon::render(&self.snapshot.candles), panel_height);
+        let direction_icon = svg_widget(
+            icon::direction(self.snapshot.change_percent),
+            panel_height * DIRECTION_ICON_SCALE,
+        );
 
         let row = widget::row()
             .push(candle_icon)
-            .push(widget::text(price).size(14))
-            .push(arrow)
-            .push(widget::text(change).size(14))
-            .spacing(4)
+            .push(widget::text(price_label(self.snapshot.price)).size(TEXT_SIZE))
+            .push(direction_icon)
+            .push(
+                widget::text(change_label(
+                    self.snapshot.price,
+                    self.snapshot.change_percent,
+                ))
+                .size(TEXT_SIZE),
+            )
+            .spacing(CONTENT_SPACING)
             .align_y(Alignment::Center);
 
         let content = widget::container(row)
             .height(Length::Fixed(panel_height))
-            .padding([0, 6])
+            .padding(CONTENT_PADDING)
             .align_y(Alignment::Center);
 
         widget::button::custom(self.core.applet.autosize_window(content))
@@ -110,5 +107,46 @@ impl cosmic::Application for AppModel {
 
     fn style(&self) -> Option<cosmic::iced_runtime::Appearance> {
         Some(cosmic::applet::style())
+    }
+}
+
+fn svg_widget(data: String, size: f32) -> cosmic::widget::Svg {
+    widget::svg(svg::Handle::from_memory(data.into_bytes()))
+        .width(Length::Fixed(size))
+        .height(Length::Fixed(size))
+}
+
+fn price_label(price: f64) -> String {
+    if price.is_finite() && price > 0.0 {
+        format!("${price:.2}")
+    } else {
+        "$--".to_string()
+    }
+}
+
+fn change_label(price: f64, change_percent: f64) -> String {
+    if price.is_finite() && price > 0.0 && change_percent.is_finite() {
+        format!("{change_percent:+.2}%")
+    } else {
+        "--%".to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn formats_available_market_values() {
+        assert_eq!(price_label(123.456), "$123.46");
+        assert_eq!(change_label(123.456, -1.234), "-1.23%");
+    }
+
+    #[test]
+    fn hides_unavailable_market_values() {
+        assert_eq!(price_label(0.0), "$--");
+        assert_eq!(price_label(f64::NAN), "$--");
+        assert_eq!(change_label(0.0, 1.0), "--%");
+        assert_eq!(change_label(1.0, f64::NAN), "--%");
     }
 }
