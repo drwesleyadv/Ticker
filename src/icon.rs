@@ -30,7 +30,7 @@ pub fn render(candles: &[Candle]) -> String {
         .iter()
         .map(|candle| candle.high)
         .fold(f64::NEG_INFINITY, f64::max);
-    let range = (high - low).max(f64::EPSILON);
+    let range = (high - low).max(1e-9);
     let y = |price: f64| 8.0 + (high - price) / range * 48.0;
     let xs = [12.0, 32.0, 52.0];
     let width = 10.0;
@@ -51,18 +51,6 @@ pub fn render(candles: &[Candle]) -> String {
     }
 
     format!(r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">{body}</svg>"#)
-}
-
-pub fn direction(change_percent: f64) -> String {
-    let (color, points) = if change_percent >= 0.0 {
-        (UP_COLOR, "32,7 52,31 40,31 40,57 24,57 24,31 12,31")
-    } else {
-        (DOWN_COLOR, "24,7 40,7 40,33 52,33 32,57 12,33 24,33")
-    };
-
-    format!(
-        r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><polygon points="{points}" fill="{color}"/></svg>"#
-    )
 }
 
 #[cfg(test)]
@@ -96,11 +84,5 @@ mod tests {
         let svg = render(&candles);
 
         assert_eq!(svg.matches("<rect").count(), 3);
-    }
-
-    #[test]
-    fn direction_matches_change_sign() {
-        assert!(direction(0.0).contains(UP_COLOR));
-        assert!(direction(-0.01).contains(DOWN_COLOR));
     }
 }
