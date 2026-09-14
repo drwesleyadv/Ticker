@@ -8,6 +8,7 @@ description = "A COSMIC panel applet for the live SOL/USDT price and three one-h
 repository = "https://github.com/drwesleyadv/Ticker"
 
 [dependencies]
+anyhow = "1"
 async-stream = "0.3"
 futures-util = "0.3"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
