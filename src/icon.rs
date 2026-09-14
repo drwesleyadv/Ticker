@@ -15,10 +15,7 @@ pub fn render(candles: &[Candle]) -> String {
         return r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="8" y="8" width="48" height="48" rx="14" fill="#69707D"/></svg>"##.to_string();
     }
 
-    let low = ordered
-        .iter()
-        .map(|c| c.low)
-        .fold(f64::INFINITY, f64::min);
+    let low = ordered.iter().map(|c| c.low).fold(f64::INFINITY, f64::min);
     let high = ordered
         .iter()
         .map(|c| c.high)
