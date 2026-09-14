@@ -30,7 +30,10 @@ struct TickerResponse {
 }
 
 fn finite(value: &str) -> Option<f64> {
-    value.parse::<f64>().ok().filter(|number| number.is_finite())
+    value
+        .parse::<f64>()
+        .ok()
+        .filter(|number| number.is_finite())
 }
 
 fn json_number(value: &Value) -> Option<f64> {
