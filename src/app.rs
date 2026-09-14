@@ -13,18 +13,10 @@ const ARROW_SCALE: f32 = 0.58;
 const CONTENT_PADDING: u16 = 6;
 const CONTENT_SPACING: u16 = 4;
 
+#[derive(Default)]
 pub struct AppModel {
     core: Core,
     snapshot: Snapshot,
-}
-
-impl Default for AppModel {
-    fn default() -> Self {
-        Self {
-            core: Core::default(),
-            snapshot: Snapshot::default(),
-        }
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -70,7 +62,7 @@ impl cosmic::Application for AppModel {
         market::subscription().map(Message::Market)
     }
 
-    fn view(&self) -> Element<Message> {
+    fn view(&self) -> Element<'_, Message> {
         let panel_height = self.core.applet.suggested_size(true).1 as f32;
 
         let candle_icon = widget::svg(svg::Handle::from_memory(
@@ -86,12 +78,16 @@ impl cosmic::Application for AppModel {
         .height(Length::Fixed(panel_height * ARROW_SCALE));
 
         let has_price = self.snapshot.price > 0.0;
-        let price = has_price
-            .then(|| format!("${:.2}", self.snapshot.price))
-            .unwrap_or_else(|| "$--".to_string());
-        let change = has_price
-            .then(|| format!("{:+.2}%", self.snapshot.change_percent))
-            .unwrap_or_else(|| "--%".to_string());
+        let price = if has_price {
+            format!("${:.2}", self.snapshot.price)
+        } else {
+            "$--".to_string()
+        };
+        let change = if has_price {
+            format!("{:+.2}%", self.snapshot.change_percent)
+        } else {
+            "--%".to_string()
+        };
 
         let row = widget::row()
             .push(candle_icon)
@@ -112,7 +108,7 @@ impl cosmic::Application for AppModel {
             .into()
     }
 
-    fn view_window(&self, _id: cosmic::iced::window::Id) -> Element<Message> {
+    fn view_window(&self, _id: cosmic::iced::window::Id) -> Element<'_, Message> {
         widget::text("").into()
     }
 
