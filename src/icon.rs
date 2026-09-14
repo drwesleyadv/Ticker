@@ -12,14 +12,9 @@ fn candle_color(candle: &Candle) -> &'static str {
 }
 
 fn valid(candle: &Candle) -> bool {
-    [
-        candle.open,
-        candle.high,
-        candle.low,
-        candle.close,
-    ]
-    .into_iter()
-    .all(|value| value.is_finite())
+    [candle.open, candle.high, candle.low, candle.close]
+        .into_iter()
+        .all(|value| value.is_finite())
 }
 
 fn snap_half(value: f64) -> f64 {
@@ -95,8 +90,7 @@ impl PriceScale {
         }
 
         if price < self.core_low && self.full_low < self.core_low - EPSILON {
-            let ratio =
-                ((self.core_low - price) / (self.core_low - self.full_low)).clamp(0.0, 1.0);
+            let ratio = ((self.core_low - price) / (self.core_low - self.full_low)).clamp(0.0, 1.0);
             return core_bottom + self.wick_band * ratio.sqrt();
         }
 
