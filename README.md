@@ -1,58 +1,47 @@
 # Solana Ticker for COSMIC
 
-A small native COSMIC panel applet that displays the live SOL/USDT price and the latest three one-hour candles.
+A minimal native COSMIC panel applet for SOL/USDT. The panel shows only the original three-candle icon and the current quote by default.
 
-## Features
+Click the ticker to open its preferences.
 
-- real-time SOL/USDT trades from Binance;
-- local reconstruction of the current one-hour OHLC candle;
-- three-candle dynamic vector icon using the original compact rendering;
-- UI refresh capped at 10 Hz;
-- automatic reconnect with exponential backoff;
-- REST resynchronization after reconnect;
-- finite-value validation for market payloads;
-- HTTP and WebSocket connection timeouts;
-- no API key and no account required;
-- designed to run as a COSMIC Panel applet, not as a standalone window.
+## Preferences
 
-The displayed market is **SOL/USDT**. USDT is used as the dollar proxy; it is not a direct fiat USD feed.
+- quote refresh interval in milliseconds (100–60000 ms);
+- candle timeframe: 1m, 5m, 15m, 30m, 1h, 4h or 1d;
+- optional Binance rolling 24-hour percentage change next to the quote;
+- **Save** applies and persists the draft;
+- **Discard** closes the popup without applying changes.
+
+Preferences are stored under the user's XDG configuration directory (`$XDG_CONFIG_HOME/com.github.drwesleyadv.Ticker/settings.json`, or `~/.config/com.github.drwesleyadv.Ticker/settings.json`).
+
+## Market data
+
+Each refresh reads Binance public market data for **SOL/USDT** and the latest three candles for the selected timeframe. No API key or account is required. USDT is used as the dollar proxy; it is not a direct fiat USD feed.
+
+The optional percentage is Binance's rolling 24-hour price change.
 
 ## Development environment
 
-The project targets **Rust 1.95.0 or newer**, edition 2024, on `x86_64-unknown-linux-gnu`. It is compatible with a system-wide Rust installation such as the Pop!_OS/Ubuntu packages (`/usr/bin/rustc` and `/usr/bin/cargo`); `rustup` is not required to build the project.
+The project targets **Rust 1.98.1 / Cargo 1.98.1**, edition 2024, on `x86_64-unknown-linux-gnu`. `libcosmic` is pinned to a known current commit so builds remain reproducible.
 
-On Ubuntu/Pop!_OS 24.04, the native build dependencies are:
+On Ubuntu/Pop!_OS 24.04, install the native build dependencies with:
 
 ```bash
 sudo apt install build-essential cmake pkg-config libssl-dev libxkbcommon-dev
 ```
 
-Core validation, which works without `rustfmt` or Clippy installed locally:
+Then validate and build:
 
 ```bash
 cargo test --locked
 cargo build --release --locked
 ```
 
-Or, with `just`:
+CI additionally runs `cargo fmt --check` and Clippy with warnings denied.
 
-```bash
-just check
-```
+## Manual installation
 
-Optional quality checks are automatically skipped when their components are unavailable:
-
-```bash
-just quality
-```
-
-CI uses Rust 1.95.0 with `rustfmt` and Clippy and treats Clippy warnings as errors.
-
-## Distribution
-
-The project is prepared for packaging in the official COSMIC Flatpak repository used by the COSMIC Store.
-
-Official COSMIC Flatpak repository: https://github.com/pop-os/cosmic-flatpak
+A validated `Ticker-manual-install` artifact is generated from successful pushes to `main`. It includes the complete source tree, the release binary and `install.sh`.
 
 ## License
 

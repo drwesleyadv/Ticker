@@ -12,12 +12,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.95.0
+          toolchain: 1.98.1
           components: rustfmt, clippy
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y build-essential cmake pkg-config libssl-dev libxkbcommon-dev
-      - name: Stabilize cosmic-text revision
-        run: cargo update -p cosmic-text --precise a07a6190548c8e40a55f6b7761387047ff1bf6ff
+      - name: Refresh dependency lock
+        run: cargo update
       - name: Format
         run: cargo fmt --check
       - name: Clippy
@@ -31,6 +31,7 @@ jobs:
         run: |
           mkdir -p dist/Ticker/bin
           git archive HEAD | tar -x -C dist/Ticker
+          cp Cargo.lock dist/Ticker/Cargo.lock
           install -Dm0755 target/release/ticker dist/Ticker/bin/ticker
           if [ -f dist/Ticker/install.sh ]; then
             chmod +x dist/Ticker/install.sh
