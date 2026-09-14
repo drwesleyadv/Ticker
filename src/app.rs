@@ -206,7 +206,7 @@ impl cosmic::Application for AppModel {
     fn view(&self) -> Element<'_, Message> {
         let panel_height = self.core.applet.suggested_size(true).1 as f32;
         let candle_icon = widget::svg(svg::Handle::from_memory(
-            icon::render(&self.snapshot.candles).into_bytes(),
+            icon::render(&self.snapshot.candles, panel_height).into_bytes(),
         ))
         .width(Length::Fixed(panel_height))
         .height(Length::Fixed(panel_height));
