@@ -196,7 +196,7 @@ impl cosmic::Application for AppModel {
             "$--".to_string()
         };
 
-        let mut row = widget::row()
+        let mut row = widget::Row::new()
             .push(candle_icon)
             .push(widget::text(price).size(TEXT_SIZE));
 
