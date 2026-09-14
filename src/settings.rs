@@ -3,7 +3,8 @@ use std::{env, fs, io, path::PathBuf};
 
 pub const MIN_UPDATE_MS: u64 = 100;
 pub const MAX_UPDATE_MS: u64 = 60_000;
-pub const TIMEFRAME_LABELS: [&str; 7] = ["1 min", "5 min", "15 min", "30 min", "1 h", "4 h", "1 dia"];
+pub const TIMEFRAME_LABELS: [&str; 7] =
+    ["1 min", "5 min", "15 min", "30 min", "1 h", "4 h", "1 dia"];
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum Timeframe {
@@ -123,11 +124,9 @@ impl From<Settings> for DraftSettings {
 
 impl DraftSettings {
     pub fn parse(&self) -> Result<Settings, String> {
-        let update_interval_ms = self
-            .update_interval_ms
-            .trim()
-            .parse::<u64>()
-            .map_err(|_| "Informe um intervalo de atualização válido em milissegundos.".to_string())?;
+        let update_interval_ms = self.update_interval_ms.trim().parse::<u64>().map_err(|_| {
+            "Informe um intervalo de atualização válido em milissegundos.".to_string()
+        })?;
 
         if !(MIN_UPDATE_MS..=MAX_UPDATE_MS).contains(&update_interval_ms) {
             return Err(format!(
