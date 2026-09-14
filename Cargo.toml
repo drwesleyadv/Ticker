@@ -2,13 +2,12 @@
 name = "ticker"
 version = "1.0.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.95"
 license = "MIT"
 description = "A COSMIC panel applet for the live SOL/USDT price and three one-hour candles."
 repository = "https://github.com/drwesleyadv/Ticker"
 
 [dependencies]
-anyhow = "1"
 async-stream = "0.3"
 futures-util = "0.3"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
