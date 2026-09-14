@@ -3,6 +3,7 @@ use std::{env, fs, io, path::PathBuf};
 
 pub const MIN_UPDATE_MS: u64 = 100;
 pub const MAX_UPDATE_MS: u64 = 60_000;
+pub const UPDATE_STEP_MS: u64 = 100;
 pub const TIMEFRAME_LABELS: [&str; 7] =
     ["1 min", "5 min", "15 min", "30 min", "1 h", "4 h", "1 dia"];
 
@@ -105,9 +106,9 @@ impl Settings {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DraftSettings {
-    pub update_interval_ms: String,
+    pub update_interval_ms: u64,
     pub timeframe_index: usize,
     pub show_change_percent: bool,
 }
@@ -115,7 +116,7 @@ pub struct DraftSettings {
 impl From<Settings> for DraftSettings {
     fn from(settings: Settings) -> Self {
         Self {
-            update_interval_ms: settings.update_interval_ms.to_string(),
+            update_interval_ms: settings.update_interval_ms,
             timeframe_index: settings.timeframe.index(),
             show_change_percent: settings.show_change_percent,
         }
@@ -123,19 +124,15 @@ impl From<Settings> for DraftSettings {
 }
 
 impl DraftSettings {
-    pub fn parse(&self) -> Result<Settings, String> {
-        let update_interval_ms = self.update_interval_ms.trim().parse::<u64>().map_err(|_| {
-            "Informe um intervalo de atualização válido em milissegundos.".to_string()
-        })?;
-
-        if !(MIN_UPDATE_MS..=MAX_UPDATE_MS).contains(&update_interval_ms) {
+    pub fn parse(self) -> Result<Settings, String> {
+        if !(MIN_UPDATE_MS..=MAX_UPDATE_MS).contains(&self.update_interval_ms) {
             return Err(format!(
                 "Use um intervalo entre {MIN_UPDATE_MS} e {MAX_UPDATE_MS} ms."
             ));
         }
 
         Ok(Settings {
-            update_interval_ms,
+            update_interval_ms: self.update_interval_ms,
             timeframe: Timeframe::from_index(self.timeframe_index),
             show_change_percent: self.show_change_percent,
         })
@@ -171,10 +168,10 @@ mod tests {
     #[test]
     fn draft_validates_update_interval() {
         let mut draft = DraftSettings::from(Settings::default());
-        draft.update_interval_ms = "99".into();
+        draft.update_interval_ms = 99;
         assert!(draft.parse().is_err());
 
-        draft.update_interval_ms = "250".into();
+        draft.update_interval_ms = 250;
         assert_eq!(draft.parse().unwrap().update_interval_ms, 250);
     }
 }
