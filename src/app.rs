@@ -3,7 +3,7 @@ use crate::{
     market::{self, Snapshot},
 };
 use cosmic::app::{Core, Task};
-use cosmic::iced::{widget::svg, Alignment, Length, Subscription};
+use cosmic::iced::{Alignment, Length, Subscription, widget::svg};
 use cosmic::prelude::*;
 use cosmic::widget;
 
