@@ -1,6 +1,6 @@
 mod app;
 mod icon;
-mod market_v2;
+mod market;
 mod settings;
 
 fn main() -> cosmic::iced::Result {
