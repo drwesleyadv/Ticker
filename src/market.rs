@@ -11,9 +11,11 @@ const MAX_BACKOFF: Duration = Duration::from_secs(30);
 const CANDLE_LIMIT: usize = 3;
 const HOUR_MS: i64 = 3_600_000;
 
-const REST_URL: &str = "https://data-api.binance.vision/api/v3/klines?symbol=SOLUSDT&interval=1h&limit=3";
+const REST_URL: &str =
+    "https://data-api.binance.vision/api/v3/klines?symbol=SOLUSDT&interval=1h&limit=3";
 const TICKER_URL: &str = "https://data-api.binance.vision/api/v3/ticker/24hr?symbol=SOLUSDT";
-const WS_URL: &str = "wss://data-stream.binance.vision:443/stream?streams=solusdt@trade/solusdt@ticker";
+const WS_URL: &str =
+    "wss://data-stream.binance.vision:443/stream?streams=solusdt@trade/solusdt@ticker";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Candle {
@@ -66,7 +68,10 @@ enum MarketEvent {
 }
 
 fn parse_number(value: &str) -> Option<f64> {
-    value.parse::<f64>().ok().filter(|number| number.is_finite())
+    value
+        .parse::<f64>()
+        .ok()
+        .filter(|number| number.is_finite())
 }
 
 fn number(value: &Value) -> Option<f64> {
