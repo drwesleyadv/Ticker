@@ -74,8 +74,8 @@ impl AppModel {
             |message| message,
         );
 
-        let change_toggle = toggler(self.draft.show_change_percent)
-            .on_toggle(Message::DraftShowChange);
+        let change_toggle =
+            toggler(self.draft.show_change_percent).on_toggle(Message::DraftShowChange);
 
         let actions = settings::item_row(vec![
             widget::button::standard("Descartar")
@@ -206,12 +206,10 @@ impl cosmic::Application for AppModel {
             );
         }
 
-        let content = widget::container(
-            row.spacing(CONTENT_SPACING).align_y(Alignment::Center),
-        )
-        .height(Length::Fixed(panel_height))
-        .padding([0, CONTENT_PADDING])
-        .align_y(Alignment::Center);
+        let content = widget::container(row.spacing(CONTENT_SPACING).align_y(Alignment::Center))
+            .height(Length::Fixed(panel_height))
+            .padding([0, CONTENT_PADDING])
+            .align_y(Alignment::Center);
 
         let open_popup = self.popup;
         widget::button::custom(self.core.applet.autosize_window(content))
