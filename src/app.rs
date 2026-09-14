@@ -1,10 +1,17 @@
-use crate::{icon, market::{self, Snapshot}};
+use crate::{
+    icon,
+    market::{self, Snapshot},
+};
 use cosmic::app::{Core, Task};
-use cosmic::iced::{Alignment, Length, Subscription, widget::svg};
+use cosmic::iced::{widget::svg, Alignment, Length, Subscription};
 use cosmic::prelude::*;
 use cosmic::widget;
 
 const APP_ID: &str = "com.github.drwesleyadv.Ticker";
+const TEXT_SIZE: u16 = 14;
+const ARROW_SCALE: f32 = 0.58;
+const CONTENT_PADDING: u16 = 6;
+const CONTENT_SPACING: u16 = 4;
 
 pub struct AppModel {
     core: Core,
@@ -30,6 +37,7 @@ impl cosmic::Application for AppModel {
     type Executor = cosmic::SingleThreadExecutor;
     type Flags = ();
     type Message = Message;
+
     const APP_ID: &'static str = APP_ID;
 
     fn core(&self) -> &Core {
@@ -54,6 +62,7 @@ impl cosmic::Application for AppModel {
         if let Message::Market(snapshot) = message {
             self.snapshot = snapshot;
         }
+
         Task::none()
     }
 
@@ -63,39 +72,38 @@ impl cosmic::Application for AppModel {
 
     fn view(&self) -> Element<Message> {
         let panel_height = self.core.applet.suggested_size(true).1 as f32;
-        let svg_data = icon::render(&self.snapshot.candles);
-        let candle_icon = widget::svg(svg::Handle::from_memory(svg_data.into_bytes()))
-            .width(Length::Fixed(panel_height))
-            .height(Length::Fixed(panel_height));
 
-        let arrow_data = icon::direction(self.snapshot.change_percent);
-        let arrow = widget::svg(svg::Handle::from_memory(arrow_data.into_bytes()))
-            .width(Length::Fixed(panel_height * 0.58))
-            .height(Length::Fixed(panel_height * 0.58));
+        let candle_icon = widget::svg(svg::Handle::from_memory(
+            icon::render(&self.snapshot.candles).into_bytes(),
+        ))
+        .width(Length::Fixed(panel_height))
+        .height(Length::Fixed(panel_height));
 
-        let price = if self.snapshot.price > 0.0 {
-            format!("${:.2}", self.snapshot.price)
-        } else {
-            "$--".to_string()
-        };
+        let arrow = widget::svg(svg::Handle::from_memory(
+            icon::direction(self.snapshot.change_percent).into_bytes(),
+        ))
+        .width(Length::Fixed(panel_height * ARROW_SCALE))
+        .height(Length::Fixed(panel_height * ARROW_SCALE));
 
-        let change = if self.snapshot.price > 0.0 {
-            format!("{:+.2}%", self.snapshot.change_percent)
-        } else {
-            "--%".to_string()
-        };
+        let has_price = self.snapshot.price > 0.0;
+        let price = has_price
+            .then(|| format!("${:.2}", self.snapshot.price))
+            .unwrap_or_else(|| "$--".to_string());
+        let change = has_price
+            .then(|| format!("{:+.2}%", self.snapshot.change_percent))
+            .unwrap_or_else(|| "--%".to_string());
 
         let row = widget::row()
             .push(candle_icon)
-            .push(widget::text(price).size(14))
+            .push(widget::text(price).size(TEXT_SIZE))
             .push(arrow)
-            .push(widget::text(change).size(14))
-            .spacing(4)
+            .push(widget::text(change).size(TEXT_SIZE))
+            .spacing(CONTENT_SPACING)
             .align_y(Alignment::Center);
 
         let content = widget::container(row)
             .height(Length::Fixed(panel_height))
-            .padding([0, 6])
+            .padding([0, CONTENT_PADDING])
             .align_y(Alignment::Center);
 
         widget::button::custom(self.core.applet.autosize_window(content))
