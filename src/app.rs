@@ -1,7 +1,9 @@
 use crate::{
     icon,
     market::{self, Snapshot},
-    settings::{DraftSettings, Settings, TIMEFRAME_LABELS},
+    settings::{
+        DraftSettings, MAX_UPDATE_MS, MIN_UPDATE_MS, Settings, TIMEFRAME_LABELS, UPDATE_STEP_MS,
+    },
 };
 use cosmic::app::{Core, Task};
 use cosmic::iced::core::window;
@@ -10,7 +12,7 @@ use cosmic::iced::{Alignment, Length, Rectangle, Subscription, widget::svg};
 use cosmic::prelude::*;
 use cosmic::surface::action::{app_popup, destroy_popup};
 use cosmic::widget::dropdown::popup_dropdown;
-use cosmic::widget::{self, list_column, settings, toggler};
+use cosmic::widget::{self, settings};
 
 const APP_ID: &str = "com.github.drwesleyadv.Ticker";
 const TEXT_SIZE: u16 = 14;
@@ -45,7 +47,7 @@ pub enum Message {
     Market(Snapshot),
     PopupClosed(Id),
     Surface(cosmic::surface::Action<Message>),
-    DraftIntervalChanged(String),
+    DraftIntervalChanged(u64),
     DraftTimeframeSelected(usize),
     DraftShowChange(bool),
     SaveSettings,
@@ -61,9 +63,16 @@ impl AppModel {
     }
 
     fn preferences_view(&self) -> Element<'_, Message> {
-        let interval = widget::text_input("1000", &self.draft.update_interval_ms)
-            .on_input(Message::DraftIntervalChanged)
-            .width(Length::Fixed(130.0));
+        let spacing = cosmic::theme::spacing();
+
+        let interval = widget::spin_button(
+            format!("{} ms", self.draft.update_interval_ms),
+            self.draft.update_interval_ms,
+            UPDATE_STEP_MS,
+            MIN_UPDATE_MS,
+            MAX_UPDATE_MS,
+            Message::DraftIntervalChanged,
+        );
 
         let timeframe = popup_dropdown(
             &TIMEFRAME_LABELS,
@@ -74,31 +83,42 @@ impl AppModel {
             |message| message,
         );
 
-        let change_toggle =
-            toggler(self.draft.show_change_percent).on_toggle(Message::DraftShowChange);
-
-        let actions = settings::item_row(vec![
-            widget::button::standard("Descartar")
-                .on_press(Message::DiscardSettings)
-                .into(),
-            widget::button::suggested("Salvar")
-                .on_press(Message::SaveSettings)
-                .into(),
-        ]);
-
-        let error = widget::text(self.validation_error.as_deref().unwrap_or(""));
-
-        list_column()
+        let preferences = settings::section()
+            .title("Ticker")
             .add(
-                settings::section()
-                    .title("Ticker")
-                    .add(settings::item("Atualização (ms)", interval))
-                    .add(settings::item("Timeframe", timeframe))
-                    .add(settings::item("Exibir variação percentual", change_toggle))
-                    .add(error)
-                    .add(actions),
+                settings::item::builder("Atualização")
+                    .description("Intervalo entre consultas de preço e candles.")
+                    .control(interval),
             )
-            .into()
+            .add(
+                settings::item::builder("Timeframe")
+                    .description("Intervalo usado para desenhar cada um dos três candles.")
+                    .control(timeframe),
+            )
+            .add(
+                settings::item::builder("Variação percentual")
+                    .description("Exibe a variação de 24 h ao lado da cotação.")
+                    .toggler(self.draft.show_change_percent, Message::DraftShowChange),
+            );
+
+        let actions = widget::Row::new()
+            .push(widget::space::horizontal())
+            .push(widget::button::standard("Descartar").on_press(Message::DiscardSettings))
+            .push(widget::button::suggested("Salvar").on_press(Message::SaveSettings))
+            .spacing(spacing.space_xs)
+            .align_y(Alignment::Center)
+            .width(Length::Fill);
+
+        let mut content = widget::column::with_capacity(3)
+            .push(preferences)
+            .spacing(spacing.space_s)
+            .width(Length::Fill);
+
+        if let Some(error) = self.validation_error.as_deref() {
+            content = content.push(widget::warning(error));
+        }
+
+        content.push(actions).into()
     }
 }
 
@@ -153,6 +173,7 @@ impl cosmic::Application for AppModel {
             }
             Message::DraftShowChange(value) => {
                 self.draft.show_change_percent = value;
+                self.validation_error = None;
             }
             Message::SaveSettings => match self.draft.parse() {
                 Ok(settings) => match settings.save() {
