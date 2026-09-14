@@ -9,7 +9,6 @@ use cosmic::widget;
 
 const APP_ID: &str = "com.github.drwesleyadv.Ticker";
 const TEXT_SIZE: u16 = 14;
-const ARROW_SCALE: f32 = 0.58;
 const CONTENT_PADDING: u16 = 6;
 const CONTENT_SPACING: u16 = 4;
 
@@ -71,29 +70,15 @@ impl cosmic::Application for AppModel {
         .width(Length::Fixed(panel_height))
         .height(Length::Fixed(panel_height));
 
-        let arrow = widget::svg(svg::Handle::from_memory(
-            icon::direction(self.snapshot.change_percent).into_bytes(),
-        ))
-        .width(Length::Fixed(panel_height * ARROW_SCALE))
-        .height(Length::Fixed(panel_height * ARROW_SCALE));
-
-        let has_price = self.snapshot.price > 0.0;
-        let price = if has_price {
+        let price = if self.snapshot.price > 0.0 {
             format!("${:.2}", self.snapshot.price)
         } else {
             "$--".to_string()
-        };
-        let change = if has_price {
-            format!("{:+.2}%", self.snapshot.change_percent)
-        } else {
-            "--%".to_string()
         };
 
         let row = widget::row()
             .push(candle_icon)
             .push(widget::text(price).size(TEXT_SIZE))
-            .push(arrow)
-            .push(widget::text(change).size(TEXT_SIZE))
             .spacing(CONTENT_SPACING)
             .align_y(Alignment::Center);
 
