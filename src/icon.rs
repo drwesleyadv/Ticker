@@ -1,4 +1,4 @@
-use crate::market_v2::Candle;
+use crate::market::Candle;
 
 fn candle_color(candle: &Candle) -> &'static str {
     if candle.close >= candle.open {
