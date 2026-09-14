@@ -225,10 +225,11 @@ fn run_stream() -> impl futures_util::Stream<Item = Snapshot> {
                                 last_emit = Instant::now();
                             }
                         }
-                        Ok(WsMessage::Ping(data))
-                            if socket.send(WsMessage::Pong(data)).await.is_err() =>
-                        {
-                            break;
+                        Ok(WsMessage::Ping(data)) => {
+                            let pong_result = socket.send(WsMessage::Pong(data)).await;
+                            if pong_result.is_err() {
+                                break;
+                            }
                         }
                         Ok(WsMessage::Close(_)) | Err(_) => break,
                         _ => {}
