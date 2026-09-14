@@ -623,7 +623,7 @@ dependencies = [
 [[package]]
 name = "build_helpers"
 version = "0.14.0"
-source = "git+https://github.com/pop-os/libcosmic#7e82198ab1aba712640b0167e58ad37bf03012ca"
+source = "git+https://github.com/pop-os/libcosmic#e793c4552b75b9ced6a69bc7ff565d6a07477137"
 dependencies = [
  "cfg_aliases",
 ]
@@ -968,7 +968,7 @@ dependencies = [
 [[package]]
 name = "cosmic-config"
 version = "1.0.0"
-source = "git+https://github.com/pop-os/libcosmic#7e82198ab1aba712640b0167e58ad37bf03012ca"
+source = "git+https://github.com/pop-os/libcosmic#e793c4552b75b9ced6a69bc7ff565d6a07477137"
 dependencies = [
  "atomicwrites",
  "cosmic-config-derive 1.0.0 (git+https://github.com/pop-os/libcosmic)",
@@ -994,7 +994,7 @@ dependencies = [
 [[package]]
 name = "cosmic-config-derive"
 version = "1.0.0"
-source = "git+https://github.com/pop-os/libcosmic#7e82198ab1aba712640b0167e58ad37bf03012ca"
+source = "git+https://github.com/pop-os/libcosmic#e793c4552b75b9ced6a69bc7ff565d6a07477137"
 dependencies = [
  "quote",
  "syn 2.0.119",
@@ -2293,7 +2293,7 @@ dependencies = [
 [[package]]
 name = "iced_core"
 version = "0.14.0"
-source = "git+https://github.com/pop-os/libcosmic#7e82198ab1aba712640b0167e58ad37bf03012ca"
+source = "git+https://github.com/pop-os/libcosmic#e793c4552b75b9ced6a69bc7ff565d6a07477137"
 dependencies = [
  "bitflags 2.13.2",
  "build_helpers 0.14.0 (git+https://github.com/pop-os/libcosmic)",
@@ -2341,7 +2341,7 @@ dependencies = [
 [[package]]
 name = "iced_futures"
 version = "0.14.0"
-source = "git+https://github.com/pop-os/libcosmic#7e82198ab1aba712640b0167e58ad37bf03012ca"
+source = "git+https://github.com/pop-os/libcosmic#e793c4552b75b9ced6a69bc7ff565d6a07477137"
 dependencies = [
  "futures",
  "iced_core 0.14.0 (git+https://github.com/pop-os/libcosmic)",
@@ -5036,7 +5036,7 @@ dependencies = [
 
 [[package]]
 name = "ticker"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "async-stream",
  "libcosmic",

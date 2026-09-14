@@ -19,6 +19,12 @@
     },
     {
         "type": "git",
+        "url": "https://github.com/pop-os/libcosmic",
+        "commit": "e793c4552b75b9ced6a69bc7ff565d6a07477137",
+        "dest": "flatpak-cargo/git/libcosmic-e793c45"
+    },
+    {
+        "type": "git",
         "url": "https://github.com/pop-os/window_clipboard",
         "commit": "f68595ee0e62fbd6589f4709b5aaa5c3c7ea5f6c",
         "dest": "flatpak-cargo/git/window_clipboard-f68595e"
@@ -918,7 +924,7 @@
     {
         "type": "shell",
         "commands": [
-            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-7e82198/iced/build_helpers\" \"cargo/vendor/build_helpers\""
+            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-e793c45/iced/build_helpers\" \"cargo/vendor/build_helpers\""
         ]
     },
     {
@@ -1408,7 +1414,7 @@
     {
         "type": "shell",
         "commands": [
-            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-7e82198/cosmic-config\" \"cargo/vendor/cosmic-config\""
+            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-e793c45/cosmic-config\" \"cargo/vendor/cosmic-config\""
         ]
     },
     {
@@ -1444,7 +1450,7 @@
     {
         "type": "shell",
         "commands": [
-            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-7e82198/cosmic-config-derive\" \"cargo/vendor/cosmic-config-derive\""
+            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-e793c45/cosmic-config-derive\" \"cargo/vendor/cosmic-config-derive\""
         ]
     },
     {
@@ -3134,7 +3140,7 @@
     {
         "type": "shell",
         "commands": [
-            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-7e82198/iced/core\" \"cargo/vendor/iced_core\""
+            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-e793c45/iced/core\" \"cargo/vendor/iced_core\""
         ]
     },
     {
@@ -3188,7 +3194,7 @@
     {
         "type": "shell",
         "commands": [
-            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-7e82198/iced/futures\" \"cargo/vendor/iced_futures\""
+            "cp -r --reflink=auto \"flatpak-cargo/git/libcosmic-e793c45/iced/futures\" \"cargo/vendor/iced_futures\""
         ]
     },
     {
